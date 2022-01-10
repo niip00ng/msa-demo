@@ -1,0 +1,113 @@
+spring:
+  application:
+    name: gateway-service
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: bus-refresh
+
+---
+spring:
+  profiles: local
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  cloud:
+    gateway:
+      routes:
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order/**
+            - Method=GET
+          filters:
+            - RewritePath=/member/(?<path>.*),/$\{path}
+            - AuthFilter
+        - id: config-service
+          uri: http://localhost:8888
+          predicates:
+            - Path=/message/**
+            - Method=GET
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+            - After=2017-01-20T17:42:47.789-07:00
+            - Cookie=valid, authp
+            - Method=GET
+          filters:
+            - RewritePath=/auth/(?<path>.*),/$\{path}
+            - AuthFilter
+        - id: member-service
+          uri: lb://MEMBER-SERVICE
+          predicates:
+            - Path=/member/**
+            - After=2017-01-20T17:42:47.789-07:00
+            - Cookie=valid, mem
+            - Method=GET
+          filters:
+            - RewritePath=/member/(?<path>.*),/$\{path}
+            - AuthFilter
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+---
+spring:
+  profiles: dev
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+  cloud:
+    gateway:
+      routes:
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order/**
+            - Method=GET
+          filters:
+            - RewritePath=/order/(?<path>.*),/$\{path}
+            - AuthFilter
+        - id: config-service
+          uri: http://config:8888
+          predicates:
+            - Path=/message/**
+            - Method=GET
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+            - After=2017-01-20T17:42:47.789-07:00
+            - Cookie=valid, authp
+            - Method=GET
+          filters:
+            - RewritePath=/auth/(?<path>.*),/$\{path}
+            - AuthFilter
+        - id: member-service
+          uri: lb://MEMBER-SERVICE
+          predicates:
+            - Path=/member/**
+            - After=2017-01-20T17:42:47.789-07:00
+            - Cookie=valid, mem
+            - Method=GET
+          filters:
+            - RewritePath=/member/(?<path>.*),/$\{path}
+            - AuthFilter
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://eureka:8761/eureka

@@ -1,0 +1,116 @@
+version: "3"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+    ports:
+      - "5672:5672"
+      - "30000:15672"
+    networks:
+      - msa-dev
+    restart: always
+    container_name: rabbitmq
+
+  netflix-config:
+    image: msa-config
+    build:
+      context: .
+      dockerfile: ./netflix-config/Dockerfile
+    ports:
+      - "8888:8888"
+    networks:
+      - msa-dev
+    volumes:
+    - /Users/a420466/Desktop/playground/msa-demo/logs:/var/logs
+    depends_on:
+      - rabbitmq
+    restart: always
+    container_name: config
+
+  netflix-eureka:
+    image: msa-eureka
+    build:
+      context: .
+      dockerfile: ./netflix-oss-eureka/Dockerfile
+    ports:
+      - "8761:8761"
+    networks:
+      - msa-dev
+    depends_on:
+      - rabbitmq
+      - netflix-config
+    restart: always
+    container_name: eureka
+
+  netflix-gateway:
+    image: msa-gateway
+    build:
+      context: .
+      dockerfile: ./netflix-gateway/Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - msa-dev
+    depends_on:
+      - rabbitmq
+      - netflix-config
+      - netflix-eureka
+    restart: always
+    container_name: gateway
+
+  netflix-member:
+    image: msa-member
+    build:
+      context: .
+      dockerfile: ./netflix-oss-member/Dockerfile
+    ports:
+      - "60001:60001"
+    networks:
+      - msa-dev
+    depends_on:
+      - rabbitmq
+      - netflix-config
+      - netflix-eureka
+      - netflix-gateway
+    restart: always
+    container_name: member
+
+  netflix-auth:
+    image: msa-auth
+    build:
+      context: .
+      dockerfile: ./netflix-oss-auth/Dockerfile
+    ports:
+      - "60002:60002"
+    networks:
+      - msa-dev
+    depends_on:
+      - rabbitmq
+      - netflix-config
+      - netflix-eureka
+      - netflix-gateway
+    restart: always
+    container_name: auth
+
+  netflix-order:
+    image: msa-order
+    build:
+      context: .
+      dockerfile: ./netflix-oss-order/Dockerfile
+    ports:
+      - "60003:60003"
+    networks:
+      - msa-dev
+    depends_on:
+      - rabbitmq
+      - netflix-config
+      - netflix-eureka
+      - netflix-gateway
+    restart: always
+    container_name: order
+
+networks:
+  msa-dev:
+    driver: bridge

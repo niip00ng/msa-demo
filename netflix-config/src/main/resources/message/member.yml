@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: member-service
+
+server:
+  port: 60001
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: bus-refresh, refresh, health, info
+eureka:
+  instance:
+    instance-id: member-msa-instance
+
+---
+spring:
+  profiles: local
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  datasource:
+    url: dbUrl
+    driver: com.h2.Driver
+    username: local
+    password: password1234
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+message:
+  owner: 로컬 config-service's native member
+  content: :) 안녕하세요 각각의 마이크로서비스에서 사용될 데이터입니다. :)
+jwt:
+  token:
+    key: local my_secret_key_change_version_change_bus_change
+
+---
+spring:
+  profiles: dev
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+  datasource:
+    url: dbUrl
+    driver: com.h2.Driver
+    username: dev
+    password: password1234
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://eureka:8761/eureka
+
+
+message:
+  owner: config-service's native member
+  content: dev :) 안녕하세요 각각의 마이크로서비스에서 사용될 데이터입니다. :)
+jwt:
+  token:
+    key: dev my_secret_key_change_version_change_bus_change

@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: discovery-service
+
+---
+spring:
+  profiles: local
+
+server:
+  port: 8761 # 1번
+
+eureka:
+  client:
+    register-with-eureka: false # 3번
+    fetch-registry: false  # 4번
+
+
+---
+spring:
+  profiles: dev
+
+server:
+  port: 8761 # 1번
+
+eureka:
+  client:
+    register-with-eureka: false # 3번
+    fetch-registry: false  # 4번

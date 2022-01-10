@@ -1,0 +1,20 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  cloud:
+    config:
+      uri: http://localhost:8888
+      name: auth
+      profile: local
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  cloud:
+    config:
+      uri: http://config:8888
+      name: auth
+      profile: dev
